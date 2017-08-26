@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Implementation-Title: softwarefactory
+Implementation-Version: 1.5.1
+Built-By: amit
+Implementation-Vendor-Id: org.springframework.samples
+Build-Jdk: 1.8.0_131
+Implementation-URL: http://projects.spring.io/spring-boot/spring-softw
+ arefactory/
+Created-By: Maven Integration for Eclipse
+Implementation-Vendor: Pivotal Software, Inc.
+
