@@ -1,5 +1,4 @@
 
-#  Dockerfile FROM UBUNTU for smellsgood
 # https://github.com/dockerfile/java/tree/master/oracle-java8
 #
 

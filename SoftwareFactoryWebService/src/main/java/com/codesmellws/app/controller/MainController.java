@@ -62,15 +62,9 @@ class MainController {
 				String args[] = { "--git", url, "--properties", projectName + ".properties" };
 			    so = ScanOptionsKt.parseOptions(args);
 				File theDir = new File(this.projectName + "_" + this.analysisId);
-			    git = app.cloneRemoteRepository(url, theDir);
+			    if (!theSame)
+			    			git = app.cloneRemoteRepository(url, theDir);
 			    result = app.analyseRevision(git, so, sha);
-			    try {
-					FileUtils.deleteDirectory(new File(this.projectName + "_" + this.analysisId));
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-		    
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
