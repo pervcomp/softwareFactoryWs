@@ -35,6 +35,9 @@ class MainController {
 	    		@RequestParam(value="analysis") String analysisId,
 	    		@RequestParam(value="sha") String sha) {
 		    String result = "";
+		    	boolean theSame = false;    
+		    if (this.projectName.equals(projectName) && this.analysisId.equals(analysisId))
+		    		theSame=true;
 			this.projectName = projectName;
 			this.analysisId = analysisId;
 			
@@ -51,7 +54,8 @@ class MainController {
 				String args[] = { "--git", url, "--properties", projectName + ".properties" };
 			    so = ScanOptionsKt.parseOptions(args);
 				File theDir = new File(this.projectName + "_" + this.analysisId);
-			    git = app.cloneRemoteRepository(url, theDir);
+			    if (!theSame)
+			    		git = app.cloneRemoteRepository(url, theDir);
 			    result = app.analyseRevision(git, so, sha);
 			    FileUtils.deleteDirectory(theDir);
 			} catch (UnsupportedEncodingException e) {

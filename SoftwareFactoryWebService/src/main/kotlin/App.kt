@@ -219,6 +219,7 @@ fun cloneRemoteRepository(repositoryURL: String, directory: File): Git {
         val result: Git = Git.cloneRepository()
                 .setURI(repositoryURL)
                 .setDirectory(directory)
+				 .setNoCheckout( true )
                 .call()
         println("Repository cloned into ${result.repository.directory.parent}")
         return result
