@@ -44,9 +44,6 @@ RUN  unzip  sonar-scanner-cli-3.0.3.778-linux.zip
 RUN mv sonar-scanner-3.0.3.778-linux sonar-scanner
 RUN mv sonar-scanner /usr/bin
 
-
-sed -i 's/original/new/g' /usr/bin/sonar-scanner/conf/sonar-scanner.properties
-
 ENV PATH="/usr/bin/sonar-scanner/bin:${PATH}"
 RUN sonar-scanner -h
 
