@@ -36,16 +36,14 @@ class MainController {
 	    		@RequestParam(value="sha") String sha) {
 		    String result = "";
 		    	boolean theSame = false;    
-		    if (this.projectName.equals(projectName) && this.analysisId.equals(analysisId) && git !=  null)
-		    		theSame=true;
-		    if (!theSame){
+	
 				try {
 					FileUtils.deleteDirectory(new File(this.projectName + "_" + this.analysisId));
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-		    }
+		    
 			this.projectName = projectName;
 			this.analysisId = analysisId;
 			
@@ -62,9 +60,7 @@ class MainController {
 				String args[] = { "--git", url, "--properties", projectName + ".properties" };
 			    so = ScanOptionsKt.parseOptions(args);
 				File theDir = new File(this.projectName + "_" + this.analysisId);
-			    if (!theSame){
-			    			git = app.cloneRemoteRepository(url, theDir);
-			    	}
+			    git = app.cloneRemoteRepository(url, theDir);
 			    result = app.analyseRevision(git, so, sha);
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
