@@ -26,7 +26,6 @@ class MainController {
 		private com.kotlin.ScanOptions so = null;
 		private com.kotlin.App app = new App();
 		private String analysisId = "";
-		private Git git;
 
 	    @RequestMapping("/analyseRevision")
 	    public String analyseRevision(@RequestParam(value="url") String url, 
@@ -60,7 +59,7 @@ class MainController {
 				String args[] = { "--git", url, "--properties", projectName + ".properties" };
 			    so = ScanOptionsKt.parseOptions(args);
 				File theDir = new File(this.projectName + "_" + this.analysisId);
-			    git = app.cloneRemoteRepository(url, theDir);
+			    Git git = app.cloneRemoteRepository(url, theDir);
 			    result = app.analyseRevision(git, so, sha);
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block

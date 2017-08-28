@@ -17,7 +17,7 @@ import java.lang.ProcessBuilder.Redirect
 
 class App constructor(){
 
-var error = "";
+var error = "";  
 
 
 
