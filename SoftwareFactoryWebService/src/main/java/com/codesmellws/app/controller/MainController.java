@@ -94,12 +94,9 @@ class MainController {
 	    @RequestMapping("/updateConfFile")
 	    public String updateConfFile( @RequestParam(value="conf") String conf,
 	    		@RequestParam(value="projectName") String projectName) {
-	    		try {
-				FileUtils.deleteDirectory(new File(projectName + ".properties"));
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+	  
+		   new File(projectName + ".properties").deleteOnExit();
+
 	    		byte[] decodedString = Base64.getUrlDecoder().decode(conf.replace("%3D",""));
 				try {
 					conf = new String(decodedString, "UTF-8");
