@@ -74,7 +74,7 @@ class MainController {
 				}}
 				String args[] = { "--git", url, "--properties", projectName + ".properties" };
 			    so = ScanOptionsKt.parseOptions(args);
-			    Git git = app.openLocalRepository(projectName);
+			    Git git = app.openLocalRepository(projectName+"/.git");
 			    result = app.analyseRevision(git, so, sha);
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
