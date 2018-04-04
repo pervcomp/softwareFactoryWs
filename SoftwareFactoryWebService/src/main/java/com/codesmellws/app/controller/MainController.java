@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.ProcessBuilder.Redirect;
+import java.nio.file.Path;
 import java.util.Base64;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -32,16 +34,30 @@ class MainController {
 	    		@RequestParam(value="conf") String conf,
 	    		@RequestParam(value="projectName") String projectName,
 	    		@RequestParam(value="analysis") String analysisId,
-	    		@RequestParam(value="sha") String sha) {
+	    		@RequestParam(value="sha") String sha)  {
 		    String result = "";
 		    	boolean theSame = false;    
-	
-				try {
-					FileUtils.deleteDirectory(new File(this.projectName + "_" + this.analysisId));
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+		   
+		    	if (!new File(projectName).exists()) {
+		    		String workingDir = System.getProperty("user.dir");
+		    		try {
+						this.execute("git clone "+url+" "+ projectName,new File(workingDir));
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+		    		
+		    	}
+		    	else{
+		    		String workingDir = System.getProperty("user.dir");
+		    		try {
+						this.execute("git pull",new File(workingDir+"/"+projectName));
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+		    	}
+		    	
 		    
 			this.projectName = projectName;
 			this.analysisId = analysisId;
@@ -58,8 +74,7 @@ class MainController {
 				}}
 				String args[] = { "--git", url, "--properties", projectName + ".properties" };
 			    so = ScanOptionsKt.parseOptions(args);
-				File theDir = new File(this.projectName + "_" + this.analysisId);
-			    Git git = app.cloneRemoteRepository(url, theDir);
+			    Git git = app.openLocalRepository(projectName);
 			    result = app.analyseRevision(git, so, sha);
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
@@ -90,6 +105,17 @@ class MainController {
 	    	}
 	    		return "OK";
 	    }
+	    
+		private void execute(String command, File directory)
+				throws Exception {
+			System.out.println("$ " + command);
+			ProcessBuilder pb = new ProcessBuilder(command.split(" "));
+			pb.directory(directory);
+			pb.redirectErrorStream(true);
+	        pb.redirectOutput(Redirect.INHERIT);
+	        Process p = pb.start();
+	        p.waitFor();
+		}
 	    
 	    @RequestMapping("/updateConfFile")
 	    public String updateConfFile( @RequestParam(value="conf") String conf,
