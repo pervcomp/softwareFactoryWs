@@ -19,15 +19,11 @@ class App constructor(){
 
 var error = "";  
 
-
-
-
-
 /*
 Analyses all past revisions for the specified project.
 Runs from the first revision or options.startFromRevision up to current revision of the git file.
  */
-fun analyseRevision(git: Git, scanOptions: ScanOptions, sha : String) : String  {
+fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long) : String  {
     //println("Log is written to ${git.repository.directory.parent}/../full-log.out")
     var sonarProperties = scanOptions.propertiesFile
     val result = mutableListOf<String>()
@@ -45,10 +41,15 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, sha : String) : String  
 
     val logDatesRaw = mutableListOf<Instant>()
     for(log in logEntries)
-        logDatesRaw.add(Instant.ofEpochSecond(log.commitTime.toLong()))
+       	 logDatesRaw.add(Instant.ofEpochSecond(log.commitTime.toLong()))
+   
     val logDates = smoothDates(logDatesRaw)
 
     for ((index, value) in logEntries.withIndex()) {
+        if (Instant.ofEpochSecond(startDate) >= Instant.ofEpochSecond(value.commitTime.toLong())){
+         continue
+        }
+    
         val logHash = value.name
         if (scanOptions.changeRevisions.size > changeIdx)
             if (logHash == scanOptions.changeRevisions[changeIdx]) {
@@ -58,7 +59,6 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, sha : String) : String  
         if (hasReached(logHash, scanOptions.startFromRevision, index) ) {
             if ((index-reachedAt) % scanOptions.analyzeEvery == 0
                     && (revisionsToScan.isEmpty() || revisionsToScan.contains(logHash))
-					&& value.name == sha
 					 )  {
                 val logDateRaw = Instant.ofEpochSecond(value.commitTime.toLong())
                 val logDate = logDates[index]
