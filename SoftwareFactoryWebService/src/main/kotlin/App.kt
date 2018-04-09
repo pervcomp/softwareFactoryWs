@@ -128,14 +128,14 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idComm
        }
    }}
    
-   		  collection = db.getCollection("commitAnalysis")
+   		  var collection1 = db.getCollection("commitAnalysis")
     		  var document = BasicDBObject();
 	      document.put("status", "Finished");
-          document.put("idSerial", "$idCommitAnalysis");
+          document.put("idSerial", idCommitAnalysis);
        	  document.put("endDate", Date());
 		  document.put("startDate", Date());
-		  document.put("idProject", "$projectName");
-		 collection.insert(document);
+		  document.put("idProject", projectName);
+		  collection1.insert(document);
     		  
  
    
