@@ -29,6 +29,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kotlin.App;
 import com.kotlin.ScanOptionsKt;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
 
 @RestController
 class MainController {
@@ -60,6 +65,14 @@ class MainController {
 	public List<String> analyseRevision(@RequestParam(value = "url") String url,
 			@RequestParam(value = "conf") String conf, @RequestParam(value = "projectName") String projectName,
 			@RequestParam(value = "analysis") String analysisId, @RequestParam(value = "date") Long date) {
+		 Mongo mongo = new MongoClient("54.202.210.49", 27017);
+		 DB db = mongo.getDB("admin"); 
+		 DBCollection collection = db.getCollection("commitAnalysis");
+		 BasicDBObject searchQuery = new BasicDBObject().append("idProject", projectName)
+				 .append("idSerial", analysisId);
+		 BasicDBObject newDocument = new BasicDBObject();
+			newDocument.put("status", "Processing"); 
+			collection.update(searchQuery, newDocument);
 		List<String> result = null;
 		boolean theSame = false;
 		Git git = null;
@@ -131,6 +144,11 @@ class MainController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		    newDocument = new BasicDBObject();
+			newDocument.put("status", "Finished"); 
+			newDocument.put("endDate", new Date()); 
+			collection.update(searchQuery, newDocument);
 
 		return result;
 	}
