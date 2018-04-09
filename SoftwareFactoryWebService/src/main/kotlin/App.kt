@@ -127,6 +127,16 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idComm
 			}
        }
    }}
+    		  var searchQuery =  BasicDBObject();
+    		  searchQuery.append("idProject", projectName);
+		  searchQuery.append("idSerial", idCommitAnalysis);
+		  var update =  BasicDBObject();
+		  update.append("status", "Finished"); 
+		  var setQuery =  BasicDBObject();
+		  setQuery.append("\$set", update);
+		  collection = db.getCollection("commitAnalysis")
+		  collection.update(searchQuery, update);
+   
 	return result;
 }
 

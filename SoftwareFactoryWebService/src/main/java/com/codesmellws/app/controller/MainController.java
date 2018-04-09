@@ -147,13 +147,13 @@ class MainController {
 			e.printStackTrace();
 		}
 		
-		  searchQuery = new BasicDBObject().append("idProject", projectName)
-				 .append("idSerial", analysisId);
+		  searchQuery = new BasicDBObject().append("idProject", projectName);
+		  searchQuery.append("idSerial", analysisId);
 		  update = new BasicDBObject();
-		 update.append("status", "Finished"); 
+		  update.append("status", "Finished"); 
 		  setQuery = new BasicDBObject();
-		 setQuery.append("$set", update);
-		 collection.update(searchQuery, update);
+		  setQuery.append("$set", update);
+		  collection.update(searchQuery, update);
 
 		return result;
 	}
