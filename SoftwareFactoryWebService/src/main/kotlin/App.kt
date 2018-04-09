@@ -132,8 +132,7 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idComm
 		  searchQuery.append("idSerial", idCommitAnalysis);
 		  var update =  BasicDBObject();
 		  update.append("status", "Finished"); 
-		  var setQuery =  BasicDBObject();
-		  setQuery.append("\$set", update);
+		  update.append("endDate", Date());
 		  collection = db.getCollection("commitAnalysis")
 		  collection.update(searchQuery, update);
    
