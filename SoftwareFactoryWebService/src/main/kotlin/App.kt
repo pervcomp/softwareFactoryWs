@@ -13,6 +13,12 @@ import java.io.FileReader
 import java.util.*
 import java.time.temporal.ChronoUnit
 import java.lang.ProcessBuilder.Redirect
+import com.mongodb.Cursor;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
 
 
 class App constructor(){
@@ -23,8 +29,11 @@ var error = "";
 Analyses all past revisions for the specified project.
 Runs from the first revision or options.startFromRevision up to current revision of the git file.
  */
-fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long) : String  {
-    //println("Log is written to ${git.repository.directory.parent}/../full-log.out")
+fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idCommitAnalysis : String,projectName : String) : List<String>  {
+    var mongo = MongoClient("54.202.210.49", 27017)
+	var db = mongo.getDB("admin")
+	var collection = db.getCollection("commit")
+	
     var sonarProperties = scanOptions.propertiesFile
     val result = mutableListOf<String>()
     copyPropertyFiles(git, scanOptions)
@@ -46,7 +55,14 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long) : Stri
     val logDates = smoothDates(logDatesRaw)
 
     for ((index, value) in logEntries.withIndex()) {
-        if (Instant.ofEpochSecond(startDate) >= Instant.ofEpochSecond(value.commitTime.toLong())){
+		println(value.name)
+        if (startDate/1000 >= value.commitTime.toLong()){
+         val logHash = value.name
+         var t = startDate;
+         var c = value.commitTime.toLong();
+         println("$logHash already analysed");
+         println("$t ");
+         println("$c");
          continue
         }
     
@@ -62,6 +78,7 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long) : Stri
 					 )  {
                 val logDateRaw = Instant.ofEpochSecond(value.commitTime.toLong())
                 val logDate = logDates[index]
+				println("test")
                 if (logDate != logDateRaw)
                     println("Date changed from $logDateRaw")
 
@@ -90,19 +107,27 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long) : Stri
                 if (returnCode == 0){
 					result.add("Analysing revision: $sonarDate $logHash .. $allText ${Calendar.getInstance().time}: EXECUTION SUCCESS");
                     logFile.deleteRecursively();
-					return ("Analysing revision: $sonarDate $logHash .. $allText ${Calendar.getInstance().time}: EXECUTION SUCCESS")
-                   
+                     println ("Analysing revision: $sonarDate $logHash .. $allText ${Calendar.getInstance().time}: EXECUTION SUCCESS")        
+                     var document = BasicDBObject();
+	                 document.put("ssa", "$logHash");
+	                 document.put("status", "SUCCESS");
+					 document.put("idCommitAnalysis", idCommitAnalysis);
+					 document.put("analysisDate", Date());
+					 document.put("creationDate", value.commitTime.toLong());
+				 	 document.put("projectName", projectName);
+					 collection.insert(document);
+					 
 				}
                 else{
-					error = "";
-                    println("${Calendar.getInstance().time}: EXECUTION FAILURE, return code $returnCode")
-					logFile.forEachLine { line -> error += '\n' + line; }
-					logFile.deleteRecursively();
-					return ("Analysing revision: $sonarDate $logHash .. $allText ${Calendar.getInstance().time}: EXECUTION FAILURE, return code $returnCode")
-				}
-        }
-    }}
-	return "";
+				 error = "";
+                 println("${Calendar.getInstance().time}: EXECUTION FAILURE, return code $returnCode")
+				 logFile.forEachLine { line -> error += '\n' + line; }
+				 logFile.deleteRecursively();
+				 result.add ("Analysing revision: $sonarDate $logHash .. $allText ${Calendar.getInstance().time}: EXECUTION FAILURE, return code $returnCode")
+			}
+       }
+   }}
+	return result;
 }
 
 fun getActualError() : String{
