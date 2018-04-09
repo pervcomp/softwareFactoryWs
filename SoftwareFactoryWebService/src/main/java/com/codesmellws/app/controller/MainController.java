@@ -70,9 +70,11 @@ class MainController {
 		 DBCollection collection = db.getCollection("commitAnalysis");
 		 BasicDBObject searchQuery = new BasicDBObject().append("idProject", projectName)
 				 .append("idSerial", analysisId);
-		 BasicDBObject newDocument = new BasicDBObject();
-			newDocument.put("status", "Processing"); 
-			collection.update(searchQuery, newDocument);
+		 BasicDBObject update = new BasicDBObject();
+		 update.append("status", "Processing"); 
+		 BasicDBObject setQuery = new BasicDBObject();
+		 setQuery.append("$set", update);
+		 collection.update(searchQuery, update);
 		List<String> result = null;
 		boolean theSame = false;
 		Git git = null;
@@ -145,10 +147,13 @@ class MainController {
 			e.printStackTrace();
 		}
 		
-		    newDocument = new BasicDBObject();
-			newDocument.put("status", "Finished"); 
-			newDocument.put("endDate", new Date()); 
-			collection.update(searchQuery, newDocument);
+		  searchQuery = new BasicDBObject().append("idProject", projectName)
+				 .append("idSerial", analysisId);
+		  update = new BasicDBObject();
+		 update.append("status", "Finished"); 
+		  setQuery = new BasicDBObject();
+		 setQuery.append("$set", update);
+		 collection.update(searchQuery, update);
 
 		return result;
 	}
