@@ -120,16 +120,15 @@ class MainController {
 		try
 
 		{
-			if (!conf.isEmpty()) {
 				File file = new File(projectName + ".properties");
-				
-					byte[] decodedString = Base64.getUrlDecoder().decode(conf.replace("%3D", ""));
+			
+					byte[] decodedString = Base64.getDecoder().decode((conf.replace("%3D", "").getBytes()));
 					conf = new String(decodedString, "UTF-8");
 					PrintWriter writer = new PrintWriter(file);
 					writer.println(conf);
 					writer.close();
 				
-			}
+			
 			String args[] = { "--git", url, "--properties", projectName + ".properties" };
 			so = ScanOptionsKt.parseOptions(args);
 			// Git git = app.openLocalRepository(projectName + "/.git");
