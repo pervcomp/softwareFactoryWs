@@ -120,7 +120,7 @@ class MainController {
 		try
 
 		{
-				File file = new File(projectName + ".properties");
+				File file = new File(projectName+"/"+projectName + ".properties");
 			
 					byte[] decodedString = Base64.getDecoder().decode((conf.replace("%3D", "").getBytes()));
 					conf = new String(decodedString, "UTF-8");
