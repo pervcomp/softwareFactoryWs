@@ -65,16 +65,6 @@ class MainController {
 	public List<String> analyseRevision(@RequestParam(value = "url") String url,
 			@RequestParam(value = "conf") String conf, @RequestParam(value = "projectName") String projectName,
 			@RequestParam(value = "analysis") String analysisId, @RequestParam(value = "date") Long date) {
-		 Mongo mongo = new MongoClient("54.202.210.49", 27017);
-		 DB db = mongo.getDB("admin"); 
-		 DBCollection collection = db.getCollection("commitAnalysis");
-		 BasicDBObject searchQuery = new BasicDBObject().append("idProject", projectName)
-				 .append("idSerial", analysisId);
-		 BasicDBObject update = new BasicDBObject();
-		 update.append("status", "Processing"); 
-		 BasicDBObject setQuery = new BasicDBObject();
-		 setQuery.append("$set", update);
-		 collection.update(searchQuery, update);
 		List<String> result = null;
 		boolean theSame = false;
 		Git git = null;
@@ -82,9 +72,9 @@ class MainController {
 			String workingDir = System.getProperty("user.dir");
 			try {
 				git = Git.cloneRepository().setURI(url).setDirectory(new File(projectName)).call();
-				Thread.sleep(2000);
+				Thread.sleep(5000);
 				while (!hasAtLeastOneReference(git.getRepository())) {
-					Thread.sleep(2000);
+					Thread.sleep(5000);
 				}
 				// this.execute("git clone "+url+" "+ projectName,new
 				// File(workingDir));
@@ -106,7 +96,7 @@ class MainController {
 				git.pull();
 				Thread.sleep(2000);
 				while (!hasAtLeastOneReference(git.getRepository())) {
-					Thread.sleep(2000);
+					Thread.sleep(5000);
 				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -120,7 +110,7 @@ class MainController {
 		try
 
 		{
-				File file = new File(projectName+"/"+projectName + ".properties");
+				File file = new File(projectName + ".properties");
 			
 					byte[] decodedString = Base64.getDecoder().decode((conf.replace("%3D", "").getBytes()));
 					conf = new String(decodedString, "UTF-8");
@@ -129,7 +119,7 @@ class MainController {
 					writer.close();
 				
 			
-			String args[] = { "--git", url, "--properties", projectName + ".properties" };
+			String args[] = { "--git", url, "--properties",projectName + ".properties" };
 			so = ScanOptionsKt.parseOptions(args);
 			// Git git = app.openLocalRepository(projectName + "/.git");
 			result = app.analyseRevision(git, so, date, analysisId, projectName);
@@ -146,13 +136,7 @@ class MainController {
 			e.printStackTrace();
 		}
 		
-		  searchQuery = new BasicDBObject().append("idProject", projectName);
-		  searchQuery.append("idSerial", analysisId);
-		  update = new BasicDBObject();
-		  update.append("status", "Finished"); 
-		  setQuery = new BasicDBObject();
-		  setQuery.append("$set", update);
-		  collection.update(searchQuery, update);
+	
 
 		return result;
 	}
