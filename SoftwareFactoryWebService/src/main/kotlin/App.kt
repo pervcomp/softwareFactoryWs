@@ -30,8 +30,21 @@ Analyses all past revisions for the specified project.
 Runs from the first revision or options.startFromRevision up to current revision of the git file.
  */
 fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idCommitAnalysis : String,projectName : String) : List<String>  {
-    var mongo = MongoClient("54.202.210.49", 27017)
+    var mongo = MongoClient("sonar-scheduler.rd.tut.fi", 9002)
 	var db = mongo.getDB("admin")
+		
+	
+	  var collection2 = db.getCollection("commitAnalysis")
+    		  var document2 = BasicDBObject();
+	      document2.put("status", "Processing");
+          document2.put("idSerial", idCommitAnalysis);
+       	  document2.put("endDate", "");
+		  document2.put("startDate", Date());
+		  document2.put("idProject", projectName);
+		  collection2.insert(document2);
+	
+	
+	
 	var collection = db.getCollection("commit")
 	
     var sonarProperties = scanOptions.propertiesFile
@@ -96,7 +109,7 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idComm
                         "-Dproject.settings=$sonarProperties",
                         "-Dsonar.projectDate=$sonarDate")
                 pb.directory(File(git.repository.directory.parent))
-                val logFile = File("${git.repository.directory.parent + File.separator}..${File.separator}full-log.out")
+                val logFile = File("${git.repository.directory.parent + File.separator}..${File.separator}full-log_$projectName.out")
                 pb.redirectErrorStream(true)
                 pb.redirectOutput(Redirect.appendTo(logFile))
                 val p = pb.start()
@@ -128,14 +141,14 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idComm
        }
    }}
    
-   		  var collection1 = db.getCollection("commitAnalysis")
-    		  var document = BasicDBObject();
-	      document.put("status", "Finished");
-          document.put("idSerial", idCommitAnalysis);
-       	  document.put("endDate", Date());
-		  document.put("startDate", Date());
-		  document.put("idProject", projectName);
-		  collection1.insert(document);
+   		  var collection1 = db.getCollection("commitAnalysis");
+    		  var document1 = BasicDBObject();
+	      document1.put("status", "Finished");
+          document1.put("idSerial", idCommitAnalysis);
+       	  document1.put("endDate", Date());
+		  document1.put("startDate", Date());
+		  document1.put("idProject", projectName);
+		  collection1.insert(document1);
     		  
  
    
