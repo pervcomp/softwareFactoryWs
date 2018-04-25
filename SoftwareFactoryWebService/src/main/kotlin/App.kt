@@ -38,7 +38,6 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idComm
     		  var document2 = BasicDBObject();
 	      document2.put("status", "Processing");
           document2.put("idSerial", idCommitAnalysis);
-       	  document2.put("endDate", "");
 		  document2.put("startDate", Date());
 		  document2.put("idProject", projectName);
 		  collection2.insert(document2);
