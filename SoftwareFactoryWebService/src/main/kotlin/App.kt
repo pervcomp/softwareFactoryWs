@@ -108,7 +108,7 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idComm
                         "-Dproject.settings=$sonarProperties",
                         "-Dsonar.projectDate=$sonarDate")
                 pb.directory(File(git.repository.directory.parent))
-                val logFile = File("${git.repository.directory.parent + File.separator}..${File.separator}full-log_$projectName.out")
+                val logFile = File("${git.repository.directory.parent + File.separator}..${File.separator}..$projectName.._full-log.out")
                 pb.redirectErrorStream(true)
                 pb.redirectOutput(Redirect.appendTo(logFile))
                 val p = pb.start()
