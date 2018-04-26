@@ -97,7 +97,7 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idComm
                 val sonarDate = getSonarDate(logDate)
                 print("Analysing revision: $sonarDate $logHash .. ")
 
-                checkoutFromCmd(logHash, git)
+                checkoutFromCmd(logHash, git, projectName)
 
                 val scannerCmd: String
                 if (SystemUtils.IS_OS_WINDOWS)
@@ -106,7 +106,9 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idComm
                     scannerCmd = "sonar-scanner"
                 val pb = ProcessBuilder(scannerCmd,
                         "-Dproject.settings=$sonarProperties",
-                        "-Dsonar.projectDate=$sonarDate")
+                        "-Dsonar.projectDate=$sonarDate",
+						"-Dsonar.analysis.scmRevision=$logHash"
+						)
                 pb.directory(File(git.repository.directory.parent))
                 val logFile = File("${git.repository.directory.parent + File.separator}..${File.separator}..$projectName.._full-log.out")
                 pb.redirectErrorStream(true)
@@ -182,10 +184,10 @@ fun readLinesFromFile(file: String): List<String> {
 /*
 Checks out the revision with specified hash, using the command line
  */
-fun checkoutFromCmd(logHash: String, git: Git) {
+fun checkoutFromCmd(logHash: String, git: Git, projectName : String) {
     val pb = ProcessBuilder("git","checkout","-f",logHash)
     pb.directory(File(git.repository.directory.parent))
-    val logFile = File("${git.repository.directory.parent}/../full-log.out")
+    val logFile = File("${git.repository.directory.parent}/../..$projectName.._full-log.out")
     pb.redirectErrorStream(true)
     pb.redirectOutput(Redirect.appendTo(logFile))
     val p = pb.start()
