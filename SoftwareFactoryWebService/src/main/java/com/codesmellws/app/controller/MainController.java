@@ -9,6 +9,7 @@ import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Path;
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -27,8 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
-import com.kotlin.App;
-import com.kotlin.ScanOptionsKt;
+ 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -42,6 +42,7 @@ class MainController {
 	private String projectName = "";
 	private com.kotlin.ScanOptions so = null;
 	private com.kotlin.App app = new App();
+	private HashMap<String, Thread> threadList = new HashMap<String, Thread>();
 	private String analysisId = "";
 
 	@RequestMapping("/newProject")
@@ -65,6 +66,14 @@ class MainController {
 	public List<String> analyseRevision(@RequestParam(value = "url") String url,
 			@RequestParam(value = "conf") String conf, @RequestParam(value = "projectName") String projectName,
 			@RequestParam(value = "analysis") String analysisId, @RequestParam(value = "date") Long date) {
+		if (threadList.containsKey(projectName)){
+			Thread t = threadList.get(projectName);
+			if (t.isAlive())
+				return null;
+			else{
+				threadList.remove(projectName);
+				}
+		}
 		List<String> result = null;
 		boolean theSame = false;
 		Git git = null;
@@ -121,8 +130,9 @@ class MainController {
 			
 			String args[] = { "--git", url, "--properties",projectName + ".properties" };
 			so = ScanOptionsKt.parseOptions(args);
-			// Git git = app.openLocalRepository(projectName + "/.git");
-			result = app.analyseRevision(git, so, date, analysisId, projectName);
+			ThreadAnalyser ta = new ThreadAnalyser(git, so, date, analysisId, projectName);
+			threadList.put(projectName,ta);
+			ta.start();
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -155,6 +165,18 @@ class MainController {
 		}
 		return "OK";
 	}
+	
+	@RequestMapping("/deleteAnalysis")
+	public String deleteAnalysis(@RequestParam(value = "projectName") String projectName) {
+		if (threadList.containsKey(projectName)){
+		threadList.get(projectName).stop();
+		threadList.remove(projectName);
+		}
+		return "";
+	}
+	
+	
+	
 
 	private void execute(String command, File directory) throws Exception {
 		System.out.println("$ " + command);
