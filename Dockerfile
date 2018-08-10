@@ -27,7 +27,7 @@ RUN apt-get install -y git
 RUN export JAVA_HOME=/usr/lib/jvm/java-8-openjdk
 VOLUME /tmp
 EXPOSE 8080
-ADD target/spring-softwarefactoryws-1.5.1.war  app.jar
+ADD target/webservice-1.5.1.war  app.jar
 ENV JAVA_OPTS=""
 RUN ln -fs /usr/share/zoneinfo/Europe/Rome /etc/localtime
 #&& dpkg-reconfigure -f noninteractive tzdata
