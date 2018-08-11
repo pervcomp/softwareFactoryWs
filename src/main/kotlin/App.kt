@@ -29,20 +29,18 @@ var error = "";
 Analyses all past revisions for the specified project.
 Runs from the first revision or options.startFromRevision up to current revision of the git file.
  */
-fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idCommitAnalysis : String,projectName : String) : List<String>  {
-    var mongo = MongoClient("sonar-scheduler.rd.tut.fi", 9002)
+fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idCommitAnalysis : String,projectName : String, mongoURI : String, port : Int) : List<String>  {
+	var mongo = MongoClient(mongoURI, port)
 	var db = mongo.getDB("admin")
 		
 	
 	  var collection2 = db.getCollection("commitAnalysis")
-    		  var document2 = BasicDBObject();
+    	  var document2 = BasicDBObject();
 	      document2.put("status", "Processing");
           document2.put("idSerial", idCommitAnalysis);
 		  document2.put("startDate", Date());
 		  document2.put("idProject", projectName);
 		  collection2.insert(document2);
-	
-	
 	
 	var collection = db.getCollection("commit")
 	

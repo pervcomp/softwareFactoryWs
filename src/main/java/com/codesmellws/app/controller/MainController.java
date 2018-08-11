@@ -19,6 +19,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kotlin.App;
 import com.kotlin.ScanOptionsKt;
 
- 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -39,22 +39,24 @@ import com.mongodb.MongoClient;
 @RestController
 class MainController {
 
-	
 	private String projectName = "";
 	private com.kotlin.ScanOptions so = null;
 	private com.kotlin.App app = new App();
 	private HashMap<String, Thread> threadList = new HashMap<String, Thread>();
 	private String analysisId = "";
 
+	@Value("${spring.data.mongodb.host}")
+	private String host;
+
+	@Value("${spring.data.mongodb.port}")
+	private String port;
+
 	@RequestMapping("/newProject")
 	public String newProject(@RequestParam(value = "url") String url,
 			@RequestParam(value = "projectName") String projectName) {
 		if (!new File(projectName).exists()) {
 			try {
-				Git git = Git.cloneRepository()
-						  .setURI( url )
-						  .setDirectory(new File(projectName))
-						  .call();
+				Git git = Git.cloneRepository().setURI(url).setDirectory(new File(projectName)).call();
 			} catch (GitAPIException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -63,17 +65,23 @@ class MainController {
 		return "OK";
 	}
 
+	@RequestMapping("/test")
+	public String test() {
+		System.out.print("");
+		return "OK";
+	}
+
 	@RequestMapping("/analyseRevision")
 	public List<String> analyseRevision(@RequestParam(value = "url") String url,
 			@RequestParam(value = "conf") String conf, @RequestParam(value = "projectName") String projectName,
 			@RequestParam(value = "analysis") String analysisId, @RequestParam(value = "date") Long date) {
-		if (threadList.containsKey(projectName)){
+		if (threadList.containsKey(projectName)) {
 			Thread t = threadList.get(projectName);
 			if (t.isAlive())
 				return null;
-			else{
+			else {
 				threadList.remove(projectName);
-				}
+			}
 		}
 		List<String> result = null;
 		boolean theSame = false;
@@ -120,19 +128,18 @@ class MainController {
 		try
 
 		{
-				File file = new File(projectName + ".properties");
-			
-					byte[] decodedString = Base64.getDecoder().decode((conf.replace("%3D", "").getBytes()));
-					conf = new String(decodedString, "UTF-8");
-					PrintWriter writer = new PrintWriter(file);
-					writer.println(conf);
-					writer.close();
-				
-			
-			String args[] = { "--git", url, "--properties",projectName + ".properties" };
+			File file = new File(projectName + ".properties");
+			byte[] decodedString = Base64.getDecoder().decode((conf.replace("%3D", "").getBytes()));
+			conf = new String(decodedString, "UTF-8");
+			PrintWriter writer = new PrintWriter(file);
+			writer.println(conf);
+			writer.close();
+
+			String args[] = { "--git", url, "--properties", projectName + ".properties" };
 			so = ScanOptionsKt.parseOptions(args);
-			ThreadAnalyser ta = new ThreadAnalyser(git, so, date, analysisId, projectName);
-			threadList.put(projectName,ta);
+			ThreadAnalyser ta = new ThreadAnalyser(git, so, date, analysisId, projectName, host,
+					Integer.parseInt(port));
+			threadList.put(projectName, ta);
 			ta.start();
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
@@ -146,8 +153,6 @@ class MainController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-	
 
 		return result;
 	}
@@ -166,18 +171,15 @@ class MainController {
 		}
 		return "OK";
 	}
-	
+
 	@RequestMapping("/deleteAnalysis")
 	public String deleteAnalysis(@RequestParam(value = "projectName") String projectName) {
-		if (threadList.containsKey(projectName)){
-		threadList.get(projectName).stop();
-		threadList.remove(projectName);
+		if (threadList.containsKey(projectName)) {
+			threadList.get(projectName).stop();
+			threadList.remove(projectName);
 		}
 		return "";
 	}
-	
-	
-	
 
 	private void execute(String command, File directory) throws Exception {
 		System.out.println("$ " + command);
