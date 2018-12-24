@@ -57,6 +57,8 @@ class MainController {
 		if (!new File(projectName).exists()) {
 			try {
 				Git git = Git.cloneRepository().setURI(url).setDirectory(new File(projectName)).call();
+				File file = new File(projectName + "/sonar-project.properties ");
+				file.delete();
 			} catch (GitAPIException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
