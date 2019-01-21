@@ -105,7 +105,9 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idComm
                 val pb = ProcessBuilder(scannerCmd,
                         "-Dproject.settings=$sonarProperties",
                         "-Dsonar.projectDate=$sonarDate",
-						"-Dsonar.analysis.scmRevision=$logHash"
+						"-Dsonar.analysis.scmRevision=$logHash",
+                        "-Dsonar.java.binaries=."
+
 						)
                 pb.directory(File(git.repository.directory.parent))
                 val logFile = File("${git.repository.directory.parent + File.separator}..${File.separator}..$projectName.._full-log.out")
