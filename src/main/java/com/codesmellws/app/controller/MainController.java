@@ -76,7 +76,7 @@ class MainController {
 	@RequestMapping("/analyseRevision")
 	public List<String> analyseRevision(@RequestParam(value = "url") String url,
 			@RequestParam(value = "conf") String conf, @RequestParam(value = "projectName") String projectName,
-			@RequestParam(value = "analysis") String analysisId, @RequestParam(value = "date") Long date) {
+			@RequestParam(value = "analysis") String analysisId, @RequestParam(value = "startDate") Long startDate, @RequestParam(value = "endDate") Long endDate) {
 		if (threadList.containsKey(projectName)) {
 			Thread t = threadList.get(projectName);
 			if (t.isAlive())
@@ -139,7 +139,7 @@ class MainController {
 
 			String args[] = { "--git", url, "--properties", projectName + ".properties" };
 			so = ScanOptionsKt.parseOptions(args);
-			ThreadAnalyser ta = new ThreadAnalyser(git, so, date, analysisId, projectName, host,
+			ThreadAnalyser ta = new ThreadAnalyser(git, so, startDate, endDate, analysisId, projectName, host,
 					Integer.parseInt(port));
 			threadList.put(projectName, ta);
 			ta.start();
