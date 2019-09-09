@@ -33,6 +33,9 @@ Runs from the first revision or options.startFromRevision up to current revision
 fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, endDate : Long, idCommitAnalysis : String, projectName : String, mongoURI : String, port : Int) : List<String>  {
 	var mongo = MongoClient(mongoURI, port)
 	var db = mongo.getDB("admin")
+	
+	println("starDate" + startDate);
+	println("endDate" + endDate);
 		
 	
 	  var collection2 = db.getCollection("commitAnalysis")
@@ -82,15 +85,15 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, endDat
         }
         
         if (endDate/1000 < value.commitTime.toLong()){
-           return result
+           println("break");
+           break;
         }
         
         val commitDateObject = Date(value.commitTime.toLong()*1000)
         val localDate = commitDateObject.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
       	 
     		if (currentMonthInt !=  localDate.getMonthValue()){
-    		currentMonthInt = localDate.getMonthValue()
-    		currentYearInt = localDate.getYear()
+    		
         val logHash = value.name
         if (scanOptions.changeRevisions.size > changeIdx)
             if (logHash == scanOptions.changeRevisions[changeIdx]) {
@@ -108,6 +111,11 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, endDat
                     println("Date changed from $logDateRaw")
 
                 val sonarDate = getSonarDate(logDate)
+                
+                currentMonthInt = localDate.getMonthValue()
+    						currentYearInt = localDate.getYear()
+                
+                
                 print("Analysing revision: $sonarDate $logHash .. ")
 
                 checkoutFromCmd(logHash, git, projectName)
