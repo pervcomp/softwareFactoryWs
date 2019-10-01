@@ -11,7 +11,6 @@ import java.io.InputStreamReader
 import java.io.BufferedReader
 import java.io.FileReader
 import java.util.*
-import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.lang.ProcessBuilder.Redirect
 import com.mongodb.Cursor;
@@ -30,12 +29,9 @@ var error = "";
 Analyses all past revisions for the specified project.
 Runs from the first revision or options.startFromRevision up to current revision of the git file.
  */
-fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, endDate : Long, idCommitAnalysis : String, projectName : String, mongoURI : String, port : Int) : List<String>  {
+fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, idCommitAnalysis : String,projectName : String, mongoURI : String, port : Int) : List<String>  {
 	var mongo = MongoClient(mongoURI, port)
 	var db = mongo.getDB("admin")
-	
-	println("starDate" + startDate);
-	println("endDate" + endDate);
 		
 	
 	  var collection2 = db.getCollection("commitAnalysis")
@@ -67,13 +63,9 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, endDat
        	 logDatesRaw.add(Instant.ofEpochSecond(log.commitTime.toLong()))
    
     val logDates = smoothDates(logDatesRaw)
-    
-    var currentMonthInt = 0
-    var currentYearInt = 0
 
     for ((index, value) in logEntries.withIndex()) {
 		println(value.name)
-		
         if (startDate/1000 >= value.commitTime.toLong()){
          val logHash = value.name
          var t = startDate;
@@ -83,17 +75,7 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, endDat
          println("$c");
          continue
         }
-        
-        if (endDate/1000 < value.commitTime.toLong()){
-           println("break");
-           break;
-        }
-        
-        val commitDateObject = Date(value.commitTime.toLong()*1000)
-        val localDate = commitDateObject.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      	 
-    		if (currentMonthInt !=  localDate.getMonthValue()){
-    		
+    
         val logHash = value.name
         if (scanOptions.changeRevisions.size > changeIdx)
             if (logHash == scanOptions.changeRevisions[changeIdx]) {
@@ -106,16 +88,11 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, endDat
 					 )  {
                 val logDateRaw = Instant.ofEpochSecond(value.commitTime.toLong())
                 val logDate = logDates[index]
-				
+				println("test")
                 if (logDate != logDateRaw)
                     println("Date changed from $logDateRaw")
 
                 val sonarDate = getSonarDate(logDate)
-                
-                currentMonthInt = localDate.getMonthValue()
-    						currentYearInt = localDate.getYear()
-                
-                
                 print("Analysing revision: $sonarDate $logHash .. ")
 
                 checkoutFromCmd(logHash, git, projectName)
@@ -165,7 +142,7 @@ fun analyseRevision(git: Git, scanOptions: ScanOptions, startDate : Long, endDat
 				 result.add ("Analysing revision: $sonarDate $logHash .. $allText ${Calendar.getInstance().time}: EXECUTION FAILURE, return code $returnCode")
 			}
        }
-   }}}
+   }}
    
    		  var collection1 = db.getCollection("commitAnalysis");
     		  var document1 = BasicDBObject();

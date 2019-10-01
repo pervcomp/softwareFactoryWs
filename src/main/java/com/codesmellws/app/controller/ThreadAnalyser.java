@@ -8,19 +8,17 @@ public class ThreadAnalyser extends Thread {
 	private String projectName;
 	private Git git;
 	private String analysisId;
-	private Long startDate;
-	private Long endDate;
+	private Long date;
 	private String mongoURI;
 	private int port;
 	private com.kotlin.ScanOptions so = null;
 
 	
-	public ThreadAnalyser(Git git,  com.kotlin.ScanOptions so, Long startDate, Long endDate, String analysisId, String projectName, String mongoURI, int port){
+	public ThreadAnalyser(Git git,  com.kotlin.ScanOptions so, Long date, String analysisId, String projectName, String mongoURI, int port){
 		this.projectName = projectName;
 		this.git = git;
 		this.analysisId = analysisId;
-		this.startDate = startDate;
-		this.endDate = endDate;
+		this.date = date;
 		this.so = so;
 		this.mongoURI = mongoURI;
 		this.port = port;
@@ -30,6 +28,6 @@ public class ThreadAnalyser extends Thread {
 	@Override
 	public void run(){
 		com.kotlin.App app = new App();
-		app.analyseRevision(git, so, startDate,endDate, analysisId, projectName,mongoURI,port);
+		app.analyseRevision(git, so, date, analysisId, projectName,mongoURI,port);
 	}
 }
